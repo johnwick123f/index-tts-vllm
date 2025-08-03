@@ -157,7 +157,6 @@ class UnifiedVoice(nn.Module):
         conds_mask = self.cond_mask_pad(mask.squeeze(1))
         conds = self.perceiver_encoder(speech_conditioning_input, conds_mask)  # (b, 32, d)
         return conds
-      
     async def inference_speech(self, speech_conditioning_latent, text_inputs, cond_mel_lengths=None, amount_tokens=30):
         text_inputs = F.pad(text_inputs, (0, 1), value=self.stop_text_token)
         text_inputs, _ = self.build_aligned_inputs_and_targets(text_inputs, self.start_text_token, self.stop_text_token)
@@ -184,8 +183,6 @@ class UnifiedVoice(nn.Module):
                 tokens_num = 0
         if tokens_num > 10:
             yield output.outputs[0].token_ids, None, tokens_num
-
-tts.gpt.inference_speech = inference_speech
     def set_mel_padding(self, mel_input_tokens, mel_lengths):
         """
         Given mel tokens that are derived from a padded audio clip and the actual lengths of each batch element in
