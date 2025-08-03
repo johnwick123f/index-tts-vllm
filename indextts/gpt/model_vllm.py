@@ -157,9 +157,8 @@ class UnifiedVoice(nn.Module):
         conds_mask = self.cond_mask_pad(mask.squeeze(1))
         conds = self.perceiver_encoder(speech_conditioning_input, conds_mask)  # (b, 32, d)
         return conds
-
-    async def inference_speech(self, speech_conditioning_latent, text_inputs, cond_mel_lengths=None):
-
+      
+    async def inference_speech(self, speech_conditioning_latent, text_inputs, cond_mel_lengths=None, amount_tokens=30):
         text_inputs = F.pad(text_inputs, (0, 1), value=self.stop_text_token)
         text_inputs, _ = self.build_aligned_inputs_and_targets(text_inputs, self.start_text_token, self.stop_text_token)
         text_emb = self.text_embedding(text_inputs) + self.text_pos_embedding(text_inputs)
@@ -177,18 +176,16 @@ class UnifiedVoice(nn.Module):
         tokens_prompt = TokensPrompt(prompt_token_ids=fake_inputs, multi_modal_data=multi_modal_data)
         output_generator = self.llm.generate(tokens_prompt, sampling_params=self.sampling_params, request_id=uuid.uuid4())
         # latent = []
+        tokens_num = 0
         async for output in output_generator:
-            # latent.append(output.hidden_states.clone())
-            pass
-        codes = output.outputs[0].token_ids[:-2]
+            tokens_num = tokens_num + 1
+            if tokens_num == amount_tokens:
+                yield output.outputs[0].token_ids, None, None
+                tokens_num = 0
+        if tokens_num > 10:
+            yield output.outputs[0].token_ids, None, tokens_num
 
-        # latent = torch.cat(latent[:-2], dim=0).unsqueeze(0)
-        # # latent = self.final_norm(latent.float())
-        # latent = latent.float()
-        # print("codes", len(codes), codes)
-        # print("latent", latent.shape, latent)
-        return codes, None  # , latent
-
+tts.gpt.inference_speech = inference_speech
     def set_mel_padding(self, mel_input_tokens, mel_lengths):
         """
         Given mel tokens that are derived from a padded audio clip and the actual lengths of each batch element in
