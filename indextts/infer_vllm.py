@@ -173,7 +173,7 @@ class IndexTTS:
         filtered_latent = valid_latent[keep_indices].unsqueeze(0)  # [1, new_seq, dim]
         # print("filtered_latent", filtered_latent.shape)
         return filtered_latent
-   async def infer(self, audio_prompt: List[str], text, output_path=None, verbose=False, amount_tokens=20):
+    async def infer(self, audio_prompt: List[str], text, output_path=None, verbose=False, amount_tokens=20):
         audio_prompt = [self.audio_file]
         start_time = time.perf_counter()
         auto_conditioning = []
