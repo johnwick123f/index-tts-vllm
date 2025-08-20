@@ -145,6 +145,7 @@ class UnifiedVoice(nn.Module):
             repetition_penalty=10.0,  # 8.0
             max_tokens=768,  # 605
         )
+        self.min_tokens = 15
 
     def build_aligned_inputs_and_targets(self, input, start_token, stop_token):
         inp = F.pad(input, (1, 0), value=start_token)
@@ -181,7 +182,7 @@ class UnifiedVoice(nn.Module):
             if tokens_num == amount_tokens:
                 yield output.outputs[0].token_ids, None, None
                 tokens_num = 0
-        if tokens_num > 10:
+        if tokens_num > self.min_tokens:
             yield output.outputs[0].token_ids, None, tokens_num
     def set_mel_padding(self, mel_input_tokens, mel_lengths):
         """
