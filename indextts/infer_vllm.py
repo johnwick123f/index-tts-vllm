@@ -183,6 +183,7 @@ class IndexTTS:
         latent = []
         codes = []
         first_chunk = True
+        full_codes = []
         
         
         ## get already processed speech latents and conditioning instead of processing again and again
