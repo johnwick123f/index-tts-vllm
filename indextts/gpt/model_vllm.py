@@ -145,7 +145,8 @@ class UnifiedVoice(nn.Module):
             repetition_penalty=10.0,  # 8.0
             max_tokens=768,  # 605
         )
-        self.min_tokens = 15
+        self.min_tokens = 20
+                   
 
     def build_aligned_inputs_and_targets(self, input, start_token, stop_token):
         inp = F.pad(input, (1, 0), value=start_token)
